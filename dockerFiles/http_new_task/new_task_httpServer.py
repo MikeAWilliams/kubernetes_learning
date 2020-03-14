@@ -9,14 +9,29 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import logging
 import json
 import pika
+import time
+
+logging.basicConfig(level=logging.INFO)
 
 
 class RabbitWorker:
     def __init__(self):
-        self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host='rabbit'))
+        self.GetConnection()
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue='task_queue', durable=True)
+
+    def GetConnection(self):
+        for tryNumber in range(30):
+            try:
+                logging.info(
+                    "Trying to connect to rabbit {}".format(tryNumber))
+                self.connection = pika.BlockingConnection(
+                    pika.ConnectionParameters(host='rabbit'))
+            except:
+                logging.info("caught an exception. waiting one second")
+                time.sleep(1)
+            else:
+                break
 
     def __del__(self):
         self.connection.close()
@@ -63,7 +78,6 @@ class S(BaseHTTPRequestHandler):
 
 
 def run(server_class=HTTPServer, handler_class=S, port=8080):
-    logging.basicConfig(level=logging.INFO)
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
     logging.info('Starting httpd...\n')

@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+   rabbit:
+      image: rabbitmq
+      networks:
+         - rabbit_net
+
+   http_new_task:
+      image: http_new_task
+      networks:
+         - rabbit_net
+      ports:
+         - "8080:8080"
+      depends_on: 
+         - rabbit
+   
+   python_sleep_worker:
+      image: python_sleep_worker
+      networks:
+         - rabbit_net
+      depends_on: 
+         - rabbit
+
+networks:
+  rabbit_net:
+    driver: bridge

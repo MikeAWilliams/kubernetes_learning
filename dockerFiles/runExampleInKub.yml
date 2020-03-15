@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    run: rabbit
+  name: rabbit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: rabbit
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: rabbit
+    spec:
+      containers:
+      - image: rabbitmq
+        name: rabbit
+        resources: {}

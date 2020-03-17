@@ -1,23 +1,37 @@
-apiVersion: apps/v1
-kind: Deployment
+# set up a rabbit service and replica controler
+# https://kubernetes.io/docs/tasks/job/coarse-parallel-processing-work-queue/
+apiVersion: v1
+kind: Service
 metadata:
-  creationTimestamp: null
   labels:
-    run: rabbit
-  name: rabbit
+    component: rabbitmq
+  name: rabbitmq-service
+spec:
+  ports:
+  - port: 5672
+  selector:
+    app: taskQueue
+    component: rabbitmq
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  labels:
+    component: rabbitmq
+  name: rabbitmq-controller
 spec:
   replicas: 1
-  selector:
-    matchLabels:
-      run: rabbit
-  strategy: {}
   template:
     metadata:
-      creationTimestamp: null
       labels:
-        run: rabbit
+        app: taskQueue
+        component: rabbitmq
     spec:
       containers:
       - image: rabbitmq
-        name: rabbit
-        resources: {}
+        name: rabbitmq
+        ports:
+        - containerPort: 5672
+        resources:
+          limits:
+            cpu: 100m
